@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { headers } from 'next/headers';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -57,11 +58,26 @@ function NavLink({
   );
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Detect PIN page to render without nav/chrome
+  const headersList = await headers();
+  const pathname = headersList.get('x-pathname') || '';
+  const isPinPage = pathname === '/pin';
+
+  if (isPinPage) {
+    return (
+      <html lang="en">
+        <body className="bg-gray-50 text-gray-900 antialiased">
+          {children}
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="en">
       <body className="bg-gray-50 text-gray-900 antialiased">

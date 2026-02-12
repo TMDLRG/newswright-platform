@@ -26,7 +26,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname === '/favicon.ico'
   ) {
-    return NextResponse.next();
+    // Pass pathname to layout via header
+    const response = NextResponse.next();
+    response.headers.set('x-pathname', pathname);
+    return response;
   }
 
   // Check for valid access cookie
@@ -36,7 +39,9 @@ export async function middleware(request: NextRequest) {
   const expectedHash = await sha256(`${expectedPin}:${today}`);
 
   if (accessCookie === expectedHash) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set('x-pathname', pathname);
+    return response;
   }
 
   // Redirect to PIN page

@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, KeyboardEvent, ClipboardEvent } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function PinPage() {
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const router = useRouter();
 
   useEffect(() => {
     inputRefs.current[0]?.focus();
@@ -24,8 +22,8 @@ export default function PinPage() {
         body: JSON.stringify({ pin }),
       });
       if (res.ok) {
-        router.push('/');
-        router.refresh();
+        // Hard redirect so the browser sends the new cookie with the request
+        window.location.href = '/';
       } else {
         setError('Invalid PIN. Please try again.');
         setDigits(['', '', '', '', '', '']);
