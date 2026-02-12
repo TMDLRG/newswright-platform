@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHash } from 'crypto';
+
+/**
+ * Hash a string using Web Crypto API (matches middleware hash).
+ */
+async function sha256(message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 /**
  * POST /api/pin — Validate 6-digit PIN and set access cookie.
@@ -20,9 +30,7 @@ export async function POST(request: NextRequest) {
 
   // Generate daily-rotated hash for the cookie
   const today = new Date().toISOString().slice(0, 10);
-  const hash = createHash('sha256')
-    .update(`${expectedPin}:${today}`)
-    .digest('hex');
+  const hash = await sha256(`${expectedPin}:${today}`);
 
   const response = NextResponse.json({ success: true });
 

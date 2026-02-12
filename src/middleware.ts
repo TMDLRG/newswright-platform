@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHash } from 'crypto';
+
+/**
+ * Hash a string using Web Crypto API (Edge Runtime compatible).
+ */
+async function sha256(message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 /**
  * Global PIN authentication middleware.
  * Intercepts every request and checks for a valid `nw-access` cookie.
  * If missing/invalid → redirect to /pin.
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Paths that don't require PIN authentication
@@ -23,9 +33,7 @@ export function middleware(request: NextRequest) {
   const accessCookie = request.cookies.get('nw-access')?.value;
   const expectedPin = process.env.ACCESS_PIN || '123456';
   const today = new Date().toISOString().slice(0, 10); // daily rotation
-  const expectedHash = createHash('sha256')
-    .update(`${expectedPin}:${today}`)
-    .digest('hex');
+  const expectedHash = await sha256(`${expectedPin}:${today}`);
 
   if (accessCookie === expectedHash) {
     return NextResponse.next();
