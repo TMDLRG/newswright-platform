@@ -13,7 +13,7 @@
   "dependencies": {
     "archiver": "^7.0.0",
     "docx": "^8.5.0",
-    "next": "^15.2.4",
+    "next": "15.2.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "recharts": "^2.12.0",
